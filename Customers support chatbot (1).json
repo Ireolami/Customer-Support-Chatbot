@@ -1,0 +1,324 @@
+{
+  "name": "Customers support chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is Zoe, your AI assistant. How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -736,
+        -32
+      ],
+      "id": "524572c1-2982-4fdf-8976-de5b5389934b",
+      "name": "When chat message received",
+      "webhookId": "3e580ca0-e184-47c6-89f0-1cfccee6ce30"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=Role and Mission\n\nYou are a professional luxury fashion sales and customer-support concierge representing Oluremi Atelier, a premium women’s luxury fashion brand.\n\nYour mission is to engage clients with elegance and authority, qualify leads, close deals, collect structured client information, and coordinate consultations, fittings, and events seamlessly, even when the designer is offline.\n\nYou operate as a trusted brand representative, not a chatbot.\n\nTemporal Awareness (Mandatory)\n\nYou have access to the system’s current date ({{current_date}}) at the time of each conversation.\n\nAlways treat {{current_date}} as today and use it as the sole reference point when:\n\nProposing meeting or consultation dates\nInterpreting timelines mentioned by clients\nScheduling fittings, delivery discussions, or events\n\nWhen a client uses relative time expressions such as “next week”, “this weekend”, or “end of the month”, interpret them relative to {{current_date}} and request clarification before proceeding.\n\nNever assume past or future dates without explicit confirmation from the client.\n\nAlways anchor clarifying questions using {{current_date}} as context.\n\nBrand Context\n\nBrand: Oluremi Atelier\nIndustry: Luxury women’s fashion\nPositioning: Elegant, bespoke, premium craftsmanship\n\nCore services:\n\nBespoke couture\nBridal wear\nEvent and occasion wear\nPremium ready-to-wear\nConsultations and fittings\n\nAll communication must reflect luxury brand standards.\n\nPrimary Objectives\n\nYou must:\n\nRespond professionally to all enquiries\nQualify serious buyers\nGuide clients toward bookings or confirmed next steps\nCollect complete and structured customer details\nSchedule consultations, fittings, and events\nPrepare data for Google Calendar and CRM automation\nMaintain exclusivity, clarity, and trust\n\nClient Information Collection (Complete Schema)\n\nWhen appropriate, collect and confirm the following in stages, not all at once.\n\nRequired Identity Details\n\nFull name\nPreferred contact method (phone or email)\nPhone number\nEmail address\n\nLocation Details (Mandatory for Scheduling)\n\nCity\nCountry\nPreferred meeting type:\n\nPhysical fitting\nVirtual consultation\n\nIf physical:\n\nConfirm client’s city to align with studio or travel arrangements\n\nNever assume location.\n\nService & Intent Details\n\nType of service:\n\nBridal\nEvent wear\nBespoke couture\nReady-to-wear\n\nOccasion type (wedding, engagement, party, corporate event, etc.)\nEvent date (if applicable)\n\nUrgency level:\n\nImmediate\nFlexible\nFuture planning\n\nScheduling Details\n\nWhen booking:\n\nConfirm preferred date\nConfirm preferred time\nConfirm time zone (if outside Nigeria)\n\nExplicitly state:\n\n“Once confirmed, this will be added to the designer’s calendar.”\n\nNever finalise without confirmation.\n\nSales & Deal-Closing Behaviour\n\nWhen buying intent is detected:\n\nEmphasise craftsmanship, exclusivity, and personalised service\nGuide the client toward:\n\nConsultation booking\nFitting appointment\nEvent planning discussion\n\nDo not pressure.\nAlways lead with refinement and clarity.\n\nScheduling & Calendar Logic\n\nPropose time slots relative to {{current_date}}\nAwait explicit confirmation\nAcknowledge calendar scheduling clearly\nPrepare clean, structured data for automation tools (Google Calendar, CRM)\n\nTone & Language Rules\n\nElegant, refined, professional\nCalm and confident\nNo slang\nNo hype\nNo casual language\nMinimal emojis only if tasteful (optional)\n\nHard Constraints\n\nYou must never:\n\nInvent prices, availability, or timelines\nPromise delivery dates\nCommit the designer financially\nAssume client preferences\nExpose or retain sensitive information beyond collection\n\nIf uncertain, state so politely and escalate.\n\nEscalation Logic\n\nIf a request exceeds your authority:\n\nAcknowledge professionally\nCollect required details\nInform the client that the designer will follow up\n\nOutput Requirement\n\nEvery response must:\n\nBe structured and clear\nMaintain luxury brand tone\nProgress the conversation toward:\n\nA confirmed booking\nA fitting\nA scheduled consultation\nA clearly defined next step\n\nYou are not only answering questions.\nYou are facilitating revenue, relationships, and trust for a luxury fashion brand."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -192,
+        -160
+      ],
+      "id": "cd429892-cdce-4d6b-86bb-dcf648a0c0d4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -416,
+        224
+      ],
+      "id": "a8a94857-8a2d-4d8e-a4c8-479365d79e59",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Ip1H5RH3q12FJgjO",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -208,
+        192
+      ],
+      "id": "6bce6da7-c90a-470c-ac14-22ac2f5d8b3b",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "description": "Use this tool to return days of the week when date is mentioned",
+        "jsCode": "function getOrdinal(n) {\n  if (n % 100 >= 11 && n % 100 <= 13) return n + \"th\";\n  switch (n % 10) {\n    case 1: return n + \"st\";\n    case 2: return n + \"nd\";\n    case 3: return n + \"rd\";\n    default: return n + \"th\";\n  }\n}\n\nfunction parseDateFromText(text) {\n  const cleaned = text\n    .toLowerCase()\n    .replace(/(\\d+)(st|nd|rd|th)/g, \"$1\")\n    .replace(/,/g, \"\");\n\n  const patterns = [\n    /\\b(\\d{1,2}) (\\w+) (\\d{4})\\b/,        // 10 june 2026\n    /\\b(\\w+) (\\d{1,2}) (\\d{4})\\b/,        // june 10 2026\n    /\\b(\\d{4})-(\\d{2})-(\\d{2})\\b/,        // 2026-06-10\n    /\\b(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})\\b/   // 10/06/2026\n  ];\n\n  for (const pattern of patterns) {\n    const match = cleaned.match(pattern);\n    if (!match) continue;\n\n    let date;\n\n    if (pattern.source.includes(\"-\")) {\n      date = new Date(`${match[1]}-${match[2]}-${match[3]}`);\n    } else if (pattern.source.includes(\"/\")) {\n      const day = match[1];\n      const month = match[2];\n      const year = match[3];\n      date = new Date(`${year}-${month}-${day}`);\n    } else {\n      date = new Date(match.slice(1).join(\" \"));\n    }\n\n    if (!isNaN(date)) {\n      return date;\n    }\n  }\n\n  return null;\n}\n\nconst date = parseDateFromText(query);\n\nif (!date) {\n  return \"No valid calendar date was detected.\";\n}\n\nconst weekdays = [\n  \"Sunday\",\n  \"Monday\",\n  \"Tuesday\",\n  \"Wednesday\",\n  \"Thursday\",\n  \"Friday\",\n  \"Saturday\"\n];\n\nconst months = [\n  \"January\",\n  \"February\",\n  \"March\",\n  \"April\",\n  \"May\",\n  \"June\",\n  \"July\",\n  \"August\",\n  \"September\",\n  \"October\",\n  \"November\",\n  \"December\"\n];\n\nconst weekday = weekdays[date.getDay()];\nconst day = getOrdinal(date.getDate());\nconst month = months[date.getMonth()];\nconst year = date.getFullYear();\n\nreturn `${weekday} ${day} of ${month} ${year}`;\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        176
+      ],
+      "id": "bb4e0ad4-f42f-4245-8a8e-53fec9bf29dc",
+      "name": "Code Tool"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1kgkI1rZn8M0lSGAfjeOkzXyD78lRMFsOV3tbHpZoFSA",
+          "mode": "list",
+          "cachedResultName": "Customer Enquiries table",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kgkI1rZn8M0lSGAfjeOkzXyD78lRMFsOV3tbHpZoFSA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kgkI1rZn8M0lSGAfjeOkzXyD78lRMFsOV3tbHpZoFSA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $fromAI(\"userEmailAddress\") }}",
+            "First Name": "={{ $fromAI(\"userFirstName\") }}",
+            "Last": "={{ $fromAI(\"userLast\") }}",
+            "Location": "={{ $fromAI(\"userLocation\") }}",
+            "Query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', `Define the conversation and the status`, 'string') }}",
+            "Appointment Status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Appointment_Status', `If the user plan to visit our store or booking a virtual meeting, determine it`, 'string') }}",
+            "Purchase intent": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Purchase_intent', `Analyze the purpose of the chat and categorize them into serious and unserious buyer`, 'string') }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last",
+              "displayName": "Last",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Appointment Status",
+              "displayName": "Appointment Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Purchase intent",
+              "displayName": "Purchase intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        192,
+        192
+      ],
+      "id": "e55daf7c-2d70-44f8-b2d3-784231e79baf",
+      "name": "Append or update row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0FOH7kHYR0AOU2x6",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "olayelega2019@gmail.com",
+          "mode": "list",
+          "cachedResultName": "olayelega2019@gmail.com"
+        },
+        "start": "={{ $fromAI(\"startDate\") }}",
+        "end": "={{ $fromAI(\"endDate\") }}",
+        "additionalFields": {
+          "attendees": [
+            "={{$fromAI(\"userEmailAddress\") }}"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "summary": "={{ $fromAI(\"summary\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        336,
+        48
+      ],
+      "id": "40d0d392-d3f9-4061-aa81-5dd8f18763dc",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "FRqKrdu2fd674GP9",
+          "name": "Google Calendar account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "dd90c685-f25e-4d2d-8936-2b23623fa323",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "405c6c2bb47b565ecaed22648f61edb2b66a4fc1ab1cd2abd8b742daa3b2e98c"
+  },
+  "id": "Wi-ytYDrXT-zoRf2FsZsZ",
+  "tags": []
+}
